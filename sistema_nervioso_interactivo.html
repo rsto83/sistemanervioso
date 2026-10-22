@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aventura en el Sistema Nervioso - 4.º Grado EBI</title>
+    <!-- Tailwind CSS para diseño y responsividad -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para iconos atractivos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fredoka y Quicksand para estética infantil/educativa -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Tone.js para efectos de sonido interactivas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#6C5CE7',
+                            pink: '#FD79A8',
+                            blue: '#0984E3',
+                            green: '#00B894',
+                            yellow: '#FDCB6E',
+                            dark: '#2D3436'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        quicksand: ['Quicksand', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #F0F3F8;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4, button, .font-title {
+            font-family: 'Fredoka', sans-serif;
+        }
+        
+        /* Animaciones personalizadas */
+        .bounce-gentle {
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .pulse-slow {
+            animation: pulseSlow 3s infinite ease-in-out;
+        }
+        @keyframes pulseSlow {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.03); opacity: 0.9; }
+        }
+
+        .neuron-glow {
+            box-shadow: 0 0 20px rgba(108, 92, 231, 0.4);
+        }
+
+        /* Estilos de botones interactivos */
+        .btn-interactive {
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+        }
+        .btn-interactive:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 rgba(0,0,0,0);
+        }
+
+        /* Ocultar barra de desplazamiento en contenedores horizontales */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
+    <header class="bg-brand-purple text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showSection('inicio')">
+                <div class="bg-brand-yellow p-2 rounded-full text-brand-dark animate-spin" style="animation-duration: 12s;">
+                    <i class="fa-solid fa-brain text-2xl"></i>
+                </div>
+                <span class="font-title text-xl md:text-2xl tracking-wide font-bold">NeuroExploradores</span>
+            </div>
+            
+            <nav class="hidden md:flex space-x-2">
+                <button onclick="showSection('aprende')" class="nav-btn px-4 py-2 rounded-xl text-sm font-bold transition bg-white/10 hover:bg-white/20">
+                    <i class="fa-solid fa-book-open mr-1"></i> Aprende
+                </button>
+                <button onclick="showSection('explora')" class="nav-btn px-4 py-2 rounded-xl text-sm font-bold transition bg-white/10 hover:bg-white/20">
+                    <i class="fa-solid fa-bolt mr-1"></i> Respuestas y Sentidos
+                </button>
+                <button onclick="showSection('juegos')" class="nav-btn px-4 py-2 rounded-xl text-sm font-bold transition bg-white/10 hover:bg-white/20">
+                    <i class="fa-solid fa-gamepad mr-1"></i> Mini-Juegos
+                </button>
+                <button onclick="showSection('evaluacion')" class="nav-btn px-4 py-2 rounded-xl text-sm font-bold transition bg-brand-yellow text-brand-dark hover:bg-yellow-300">
+                    <i class="fa-solid fa-star mr-1"></i> Quiz Evaluativo
+                </button>
+            </nav>
+
+            <div class="md:hidden">
+                <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="p-2 text-2xl focus:outline-none">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Menú Móvil desplegable -->
+        <div id="mobileMenu" class="hidden md:hidden bg-brand-purple/95 px-4 pt-2 pb-4 space-y-2 border-t border-white/10">
+            <button onclick="showSection('aprende'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-lg text-white font-bold hover:bg-white/10">
+                <i class="fa-solid fa-book-open mr-2"></i> Aprende
+            </button>
+            <button onclick="showSection('explora'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-lg text-white font-bold hover:bg-white/10">
+                <i class="fa-solid fa-bolt mr-2"></i> Respuestas y Sentidos
+            </button>
+            <button onclick="showSection('juegos'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-lg text-white font-bold hover:bg-white/10">
+                <i class="fa-solid fa-gamepad mr-2"></i> Mini-Juegos
+            </button>
+            <button onclick="showSection('evaluacion'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-lg text-brand-dark bg-brand-yellow font-bold">
+                <i class="fa-solid fa-star mr-2"></i> Quiz Evaluativo
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- SECTION 1: INICIO / BANNER HERO -->
+        <section id="inicio" class="space-y-8">
+            <div class="bg-gradient-to-r from-brand-purple to-brand-blue rounded-3xl p-6 md:p-10 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-3/5 space-y-4 z-10 text-center md:text-left">
+                    <span class="bg-brand-pink text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">Ciencias Naturales - 4.º Educación Básica Integrada</span>
+                    <h1 class="text-3xl md:text-5xl font-bold leading-tight">¡Bienvenido al Centro de Control de tu Cuerpo!</h1>
+                    <p class="text-base md:text-lg opacity-90">Descubre cómo viajan los mensajes dentro de ti a la velocidad de la luz. ¡Explora, juega y demuestra todo lo que aprendes!</p>
+                    <div class="pt-2 flex flex-wrap gap-3 justify-center md:justify-start">
+                        <button onclick="showSection('aprende')" class="btn-interactive bg-brand-yellow text-brand-dark font-bold px-6 py-3 rounded-2xl hover:bg-yellow-300 flex items-center gap-2 text-lg">
+                            <i class="fa-solid fa-play"></i> Empezar la Aventura
+                        </button>
+                        <button onclick="playSound('click'); showSection('juegos')" class="btn-interactive bg-white/20 text-white font-bold px-5 py-3 rounded-2xl hover:bg-white/30 backdrop-blur-sm">
+                            <i class="fa-solid fa-gamepad"></i> Ir a Juegos
+                        </button>
+                    </div>
+                </div>
+                <div class="md:w-2/5 mt-8 md:mt-0 flex justify-center z-10 relative">
+                    <div class="w-56 h-56 md:w-64 md:w-64 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md border-4 border-white/30 pulse-slow">
+                        <!-- SVG interactivo de Cerebro con destellos -->
+                        <svg class="w-40 h-40 text-brand-yellow" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12,3A9,9 0 0,0 3,12C3,16.97 7.03,21 12,21C16.97,21 21,16.97 21,12A9,9 0 0,0 12,3M12,5A7,7 0 0,1 19,12C19,14.08 18.1,15.94 16.66,17.25C15.6,16.03 13.9,15.25 12,15.25C10.1,15.25 8.4,16.03 7.34,17.25C5.9,15.94 5,14.08 5,12A7,7 0 0,1 12,5M12,7A2,2 0 0,0 10,9A2,2 0 0,0 12,11A2,2 0 0,0 14,9A2,2 0 0,0 12,7Z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TARJETAS RÁPIDAS DE DATOS CURIOSOS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-brand-pink hover:translate-y-[-4px] transition duration-200">
+                    <div class="w-12 h-12 bg-pink-100 text-brand-pink rounded-xl flex items-center justify-center text-2xl font-bold mb-4">⚡</div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-800">¡Super Rápido!</h3>
+                    <p class="text-gray-600 text-sm">Las señales nerviosas pueden viajar por tu cuerpo a más de **400 km/h**. ¡Más rápido que un auto de carreras!</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-brand-blue hover:translate-y-[-4px] transition duration-200">
+                    <div class="w-12 h-12 bg-blue-100 text-brand-blue rounded-xl flex items-center justify-center text-2xl font-bold mb-4">🧠</div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-800">Millones de Neuronas</h3>
+                    <p class="text-gray-600 text-sm">Tu cerebro tiene alrededor de **86 mil millones de neuronas** trabajando en equipo todo el día.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-brand-green hover:translate-y-[-4px] transition duration-200">
+                    <div class="w-12 h-12 bg-green-100 text-brand-green rounded-xl flex items-center justify-center text-2xl font-bold mb-4">🛡️</div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-800">Protección Automática</h3>
+                    <p class="text-gray-600 text-sm">Tu cuerpo reacciona en un parpadeo antes de que el peligro te lastime gracias a los **actos reflejos**.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: APRENDE (PARTES DEL SISTEMA NERVIOSO) -->
+        <section id="aprende" class="hidden space-y-6">
+            <div class="text-center max-w-2xl mx-auto mb-8">
+                <h2 class="text-3xl font-bold text-brand-purple">¿Cómo se compone el Sistema Nervioso?</h2>
+                <p class="text-gray-600 mt-2">Haz clic en cada parte del esquema para explorar sus funciones principales de forma divertida.</p>
+            </div>
+
+            <!-- ESQUEMA INTERACTIVO DE PARTES -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100">
+                
+                <!-- Selector visual izquierdo / botones -->
+                <div class="lg:col-span-5 space-y-3">
+                    <button onclick="selectOrgan('encefalo')" id="btn-encefalo" class="organ-btn w-full p-4 rounded-2xl text-left border-2 border-transparent bg-indigo-50 hover:bg-indigo-100 transition flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-brand-purple text-white rounded-xl flex items-center justify-center text-xl font-bold shadow">🧠</div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-lg">El Encéfalo</h4>
+                            <p class="text-xs text-gray-500">Cerebro, Cerebelo y Tallo Cerebral</p>
+                        </div>
+                    </button>
+
+                    <button onclick="selectOrgan('medula')" id="btn-medula" class="organ-btn w-full p-4 rounded-2xl text-left border-2 border-transparent bg-pink-50 hover:bg-pink-100 transition flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-brand-pink text-white rounded-xl flex items-center justify-center text-xl font-bold shadow">🦴</div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-lg">La Médula Espinal</h4>
+                            <p class="text-xs text-gray-500">La autopista principal de señales</p>
+                        </div>
+                    </button>
+
+                    <button onclick="selectOrgan('nervios')" id="btn-nervios" class="organ-btn w-full p-4 rounded-2xl text-left border-2 border-transparent bg-yellow-50 hover:bg-yellow-100 transition flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-brand-yellow text-brand-dark rounded-xl flex items-center justify-center text-xl font-bold shadow">⚡</div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-lg">Los Nervios</h4>
+                            <p class="text-xs text-gray-500">Los cables telefónicos del cuerpo</p>
+                        </div>
+                    </button>
+
+                    <button onclick="selectOrgan('neurona')" id="btn-neurona" class="organ-btn w-full p-4 rounded-2xl text-left border-2 border-transparent bg-green-50 hover:bg-green-100 transition flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-brand-green text-white rounded-xl flex items-center justify-center text-xl font-bold shadow">🔬</div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-lg">La Neurona</h4>
+                            <p class="text-xs text-gray-500">La célula mensajera microscópica</p>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Panel de información explicativa -->
+                <div class="lg:col-span-7 bg-gray-50 p-6 md:p-8 rounded-2xl border border-gray-200 min-h-[360px] flex flex-col justify-between" id="organ-info-card">
+                    <div>
+                        <div class="flex items-center space-x-3 mb-4">
+                            <span id="organ-icon" class="text-3xl p-3 bg-white rounded-2xl shadow-sm">🧠</span>
+                            <div>
+                                <h3 id="organ-title" class="text-2xl font-bold text-brand-purple">El Encéfalo</h3>
+                                <span id="organ-subtitle" class="text-xs font-bold text-gray-400 uppercase tracking-wider">Sistema Nervioso Central</span>
+                            </div>
+                        </div>
+
+                        <p id="organ-description" class="text-gray-700 leading-relaxed text-base md:text-lg mb-4">
+                            Está dentro de tu cabeza y protegido por el cráneo. Se divide en partes geniales:
+                        </p>
+
+                        <ul id="organ-list" class="space-y-2 text-gray-700 text-sm md:text-base">
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-brand-green mt-1"></i> <span><strong>El Cerebro:</strong> Piensa, aprende, guarda recuerdos y controla tus emociones.</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-brand-green mt-1"></i> <span><strong>El Cerebelo:</strong> Mantiene tu equilibrio para correr y andar en bicicleta.</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-brand-green mt-1"></i> <span><strong>El Tallo Cerebral:</strong> Controla acciones automáticas como tu respiración y los latidos del corazón.</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-white rounded-xl border border-indigo-100 flex items-center justify-between">
+                        <span class="text-xs font-bold text-brand-purple">💡 Dato Curioso:</span>
+                        <p id="organ-funfact" class="text-xs md:text-sm text-gray-600 italic">¡Tu cerebro nunca duermedel todo! Mientras duermes sigue organizando lo que aprendiste hoy.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 3: EXPLORA (RESPUESTAS Y SENTIDOS) -->
+        <section id="explora" class="hidden space-y-8">
+            <div class="text-center max-w-2xl mx-auto">
+                <h2 class="text-3xl font-bold text-brand-blue">¿Cómo Percibimos y Respondemos?</h2>
+                <p class="text-gray-600 mt-2">El sistema nervioso recibe información de los sentidos, procesa la respuesta y la envía a los músculos.</p>
+            </div>
+
+            <!-- SIMULADOR INTERACTIVO DE PUNTOS DE REACCIÓN -->
+            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Simulador: Viaje de un Estímulo</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <button onclick="runSimulation('pelota')" class="p-4 bg-blue-50 border-2 border-brand-blue rounded-2xl text-center hover:bg-blue-100 transition">
+                        <div class="text-3xl mb-1">⚽</div>
+                        <span class="font-bold text-gray-800 block">Respuesta Voluntaria</span>
+                        <span class="text-xs text-gray-500">Atrapar una pelota que ves volar</span>
+                    </button>
+                    <button onclick="runSimulation('calor')" class="p-4 bg-red-50 border-2 border-brand-pink rounded-2xl text-center hover:bg-red-100 transition">
+                        <div class="text-3xl mb-1">🔥</div>
+                        <span class="font-bold text-gray-800 block">Respuesta Involuntaria (Reflejo)</span>
+                        <span class="text-xs text-gray-500">Tocar una olla muy caliente</span>
+                    </button>
+                    <button onclick="runSimulation('musica')" class="p-4 bg-purple-50 border-2 border-brand-purple rounded-2xl text-center hover:bg-purple-100 transition">
+                        <div class="text-3xl mb-1">🎵</div>
+                        <span class="font-bold text-gray-800 block">Estímulo Auditivo</span>
+                        <span class="text-xs text-gray-500">Bailar al escuchar tu música favorita</span>
+                    </button>
+                </div>
+
+                <!-- Visor visual de la simulación paso a paso -->
+                <div class="bg-gray-900 rounded-2xl p-6 text-white min-h-[200px] flex flex-col justify-center items-center text-center relative overflow-hidden">
+                    <div id="sim-status" class="space-y-3 z-10">
+                        <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Haz clic en una opción arriba</span>
+                        <p class="text-lg text-gray-300">Selecciona una situación para ver cómo viajan las órdenes dentro de tu cuerpo.</p>
+                    </div>
+
+                    <!-- Indicador visual animado de pulso -->
+                    <div id="sim-pulse" class="hidden absolute w-full h-2 bg-gradient-to-r from-yellow-400 via-pink-500 to-blue-500 bottom-0 left-0 animate-pulse"></div>
+                </div>
+            </div>
+
+            <!-- COMPARATIVA VOLUNTARIO VS INVOLUNTARIO -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gradient-to-br from-green-500 to-teal-600 text-white p-6 rounded-3xl shadow-md">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fa-solid fa-hand text-3xl"></i>
+                        <h3 class="text-2xl font-bold">Movimientos Voluntarios</h3>
+                    </div>
+                    <p class="text-white/90 text-sm mb-4">Tú decides cuándo hacerlos. El cerebro piensa la orden antes de mover el cuerpo.</p>
+                    <div class="bg-white/10 p-3 rounded-xl backdrop-blur-sm text-xs space-y-1">
+                        <p>🔹 Escribir tu nombre en el cuaderno.</p>
+                        <p>🔹 Patear una pelota hacia el arco.</p>
+                        <p>🔹 Masticar una manzana deliciosa.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-orange-500 to-red-600 text-white p-6 rounded-3xl shadow-md">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fa-solid fa-bolt text-3xl"></i>
+                        <h3 class="text-2xl font-bold">Movimientos Involuntarios</h3>
+                    </div>
+                    <p class="text-white/90 text-sm mb-4">Ocurren automáticamente sin pensarlos para protegerte o mantenerte con vida.</p>
+                    <div class="bg-white/10 p-3 rounded-xl backdrop-blur-sm text-xs space-y-1">
+                        <p>⚡ Latidos del corazón (¡funciona todo el tiempo!).</p>
+                        <p>⚡ Parpadear cuando entra polvo al ojo.</p>
+                        <p>⚡ Quitar la mano rápidamente al hincarse.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: MINI-JUEGOS -->
+        <section id="juegos" class="hidden space-y-8">
+            <div class="text-center max-w-2xl mx-auto">
+                <h2 class="text-3xl font-bold text-brand-green">¡Zona de Juegos Nerviosos!</h2>
+                <p class="text-gray-600 mt-2">Pon a prueba tus reflejos y tus conocimientos jugando.</p>
+            </div>
+
+            <!-- TABS DE JUEGOS -->
+            <div class="flex justify-center space-x-3 border-b border-gray-200 pb-2">
+                <button onclick="switchGame('game1')" id="tab-game1" class="px-5 py-2 font-bold rounded-xl bg-brand-green text-white shadow">
+                    🎮 Atrapa los Impulsos (Reflejos)
+                </button>
+                <button onclick="switchGame('game2')" id="tab-game2" class="px-5 py-2 font-bold rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300">
+                    🧩 Clasificador Voluntario / Involuntario
+                </button>
+            </div>
+
+            <!-- JUEGO 1: ATRAPA LOS IMPULSOS -->
+            <div id="game1-container" class="bg-white p-6 rounded-3xl shadow-lg text-center max-w-2xl mx-auto border border-gray-100">
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Desafío: Entrena tus Reflejos</h3>
+                <p class="text-gray-600 text-sm mb-4">Haz clic rápidamente sobre las neuronas encendidas (🟡) antes de que desaparezcan para transmitir el impulso nervioso.</p>
+
+                <div class="flex justify-around items-center mb-4 bg-gray-50 p-3 rounded-2xl border border-gray-200">
+                    <span class="text-lg font-bold text-gray-700">Puntos: <span id="score" class="text-brand-purple">0</span></span>
+                    <span class="text-lg font-bold text-gray-700">Tiempo: <span id="timer" class="text-brand-pink">15</span>s</span>
+                </div>
+
+                <!-- Tablero del juego Grid 3x3 -->
+                <div class="grid grid-cols-3 gap-4 max-w-xs mx-auto mb-6">
+                    <button onclick="hitNeuron(0)" class="game-hole h-24 bg-indigo-100 rounded-2xl text-4xl flex items-center justify-center transition active:scale-95 border-2 border-indigo-200" id="hole-0">🧠</button>
+                    <button onclick="hitNeuron(1)" class="game-hole h-24 bg-indigo-100 rounded-2xl text-4xl flex items-center justify-center transition active:scale-95 border-2 border-indigo-200" id="hole-1">🧠</button>
+                    <button onclick="hitNeuron(2)" class="game-hole h-24 bg-indigo-100 rounded-2xl text-4xl flex items-center justify-center transition active:scale-95 border-2 border-indigo-200" id="hole-2">🧠</button>
+                    <button onclick="hitNeuron(3)" class="game-hole h-24 bg-indigo-100 rounded-2xl text-4xl flex items-center justify-center transition active:scale-95 border-2 border-indigo-200" id="hole-3">🧠</button>
+                    <button onclick="hitNeuron(4)" class="game-hole h-24 bg-indigo-100 rounded-2xl text-4xl flex items-center justify-center transition active:scale-95 border-2 border-indigo-200" id="hole-4">🧠</button>
+                    <button onclick="hitNeuron(5)" class="game-hole h-24 bg-indigo-100 rounded-2xl text-4xl flex items-center justify-center transition active:scale-95 border-2 border-indigo-200" id="hole-5">🧠</button>
+                    <button onclick="hitNeuron(6)" class="game-hole h-24 bg-indigo-100 rounded-2xl text-4xl flex items-center justify-center transition active:scale-95 border-2 border-indigo-200" id="hole-6">🧠</button>
+                    <button onclick="hitNeuron(7)" class="game-hole h-24 bg-indigo-100 rounded-2xl text-4xl flex items-center justify-center transition active:scale-95 border-2 border-indigo-200" id="hole-7">🧠</button>
+                    <button onclick="hitNeuron(8)" class="game-hole h-24 bg-indigo-100 rounded-2xl text-4xl flex items-center justify-center transition active:scale-95 border-2 border-indigo-200" id="hole-8">🧠</button>
+                </div>
+
+                <button onclick="startGame1()" id="btn-start-game1" class="btn-interactive bg-brand-green text-white font-bold text-lg px-8 py-3 rounded-2xl hover:bg-emerald-600">
+                    🚀 Iniciar Juego
+                </button>
+            </div>
+
+            <!-- JUEGO 2: CLASIFICADOR -->
+            <div id="game2-container" class="hidden bg-white p-6 rounded-3xl shadow-lg max-w-2xl mx-auto border border-gray-100 text-center">
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">¿Voluntario o Involuntario?</h3>
+                <p class="text-gray-600 text-sm mb-6">Lee la acción y clasifícala seleccionando el botón correcto.</p>
+
+                <div id="card-action" class="bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-brand-purple p-8 rounded-2xl mb-6 shadow-sm">
+                    <span id="action-emoji" class="text-5xl block mb-2">👁️</span>
+                    <h4 id="action-text" class="text-2xl font-bold text-gray-800">Parpadear cuando una luz fuerte te ilumina los ojos</h4>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="checkClassify('involuntario')" class="btn-interactive bg-brand-pink text-white font-bold py-4 rounded-2xl text-lg hover:bg-pink-600">
+                        ⚡ Involuntario (Reflejo)
+                    </button>
+                    <button onclick="checkClassify('voluntario')" class="btn-interactive bg-brand-blue text-white font-bold py-4 rounded-2xl text-lg hover:bg-blue-600">
+                        🧠 Voluntario (Pensado)
+                    </button>
+                </div>
+
+                <div id="game2-feedback" class="mt-4 font-bold text-lg min-h-[30px]"></div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: AUTOEVALUACIÓN / QUIZ -->
+        <section id="evaluacion" class="hidden space-y-6">
+            <div class="text-center max-w-2xl mx-auto">
+                <span class="bg-brand-yellow text-brand-dark text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Demuestra lo aprendido</span>
+                <h2 class="text-3xl font-bold text-brand-purple mt-1">Desafío Final de Autoevaluación</h2>
+                <p class="text-gray-600 text-sm mt-1">Responde las 4 preguntas para ganar tu medalla de Experto Neuronal.</p>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 max-w-3xl mx-auto relative" id="quiz-box">
+                <!-- Barra de Progreso del Cuestionario -->
+                <div class="w-full bg-gray-200 h-3 rounded-full mb-6 overflow-hidden">
+                    <div id="quiz-progress" class="bg-brand-purple h-full w-1/4 transition-all duration-300"></div>
+                </div>
+
+                <!-- Pregunta actual -->
+                <div id="quiz-question-container">
+                    <span id="quiz-step" class="text-xs font-bold text-brand-purple uppercase">Pregunta 1 de 4</span>
+                    <h3 id="quiz-question" class="text-xl md:text-2xl font-bold text-gray-800 mt-1 mb-6">¿Cuál es el órgano encargado del equilibrio cuando corres o juegas?</h3>
+
+                    <div id="quiz-options" class="space-y-3">
+                        <!-- Las opciones se inyectan por JS -->
+                    </div>
+                </div>
+
+                <!-- Pantalla Final de Resultados -->
+                <div id="quiz-result" class="hidden text-center py-6 space-y-4">
+                    <div class="w-24 h-24 bg-yellow-100 text-brand-yellow rounded-full flex items-center justify-center text-5xl mx-auto shadow-inner animate-bounce">
+                        🏆
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-800">¡Felicitaciones, NeuroExplorador!</h3>
+                    <p id="quiz-score-text" class="text-lg text-gray-600">Obtuviste 4 de 4 respuestas correctas.</p>
+                    
+                    <div class="p-4 bg-purple-50 rounded-2xl border border-purple-200 max-w-md mx-auto">
+                        <p id="quiz-badge-desc" class="text-sm font-bold text-brand-purple">🥇 ¡Medalla de Oro: Maestro del Sistema Nervioso!</p>
+                    </div>
+
+                    <button onclick="resetQuiz()" class="btn-interactive bg-brand-purple text-white font-bold px-6 py-3 rounded-2xl hover:bg-indigo-700 mt-4">
+                        🔄 Intentar de Nuevo
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER EDUCATIVO -->
+    <footer class="bg-white border-t border-gray-200 mt-12 py-6 text-center text-gray-500 text-xs md:text-sm">
+        <div class="max-w-6xl mx-auto px-4 space-y-2">
+            <p class="font-bold text-gray-700">Recurso Educativo Digital - Sistema Nervioso para 4.º año de Primaria (EBI)</p>
+            <p>Diseñado para un aprendizaje activo, interactivo y divertido. 🧠⚡</p>
+        </div>
+    </footer>
+
+    <!-- LÓGICA INTERACTIVA JAVASCRIPT -->
+    <script>
+        // REPRODUCTOR DE EFECTOS DE SONIDO (Tone.js)
+        function playSound(type) {
+            try {
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                const synth = new Tone.Synth().toDestination();
+                if (type === 'click') {
+                    synth.triggerAttackRelease("C5", "8n");
+                } else if (type === 'correct') {
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("E5", "8n", now);
+                    synth.triggerAttackRelease("G5", "8n", now + 0.1);
+                } else if (type === 'wrong') {
+                    synth.triggerAttackRelease("A3", "8n");
+                } else if (type === 'win') {
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("C5", "8n", now);
+                    synth.triggerAttackRelease("E5", "8n", now + 0.15);
+                    synth.triggerAttackRelease("G5", "8n", now + 0.3);
+                    synth.triggerAttackRelease("C6", "4n", now + 0.45);
+                }
+            } catch (e) {
+                console.log("Audio no activado aún");
+            }
+        }
+
+        // NAVEGACIÓN ENTRE SECCIONES
+        function showSection(sectionId) {
+            playSound('click');
+            const sections = ['inicio', 'aprende', 'explora', 'juegos', 'evaluacion'];
+            sections.forEach(id => {
+                const sec = document.getElementById(id);
+                if (id === sectionId) {
+                    sec.classList.remove('hidden');
+                } else {
+                    sec.classList.add('hidden');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // SECCIÓN APRENDE: DATOS ORGANOS
+        const organData = {
+            encefalo: {
+                title: "El Encéfalo",
+                subtitle: "Centro del Sistema Nervioso Central",
+                icon: "🧠",
+                desc: "Está ubicado dentro de la cabeza, protegido por los huesos del cráneo. Es el jefe que procesa la información y da las órdenes a todo el cuerpo.",
+                items: [
+                    "<strong>El Cerebro:</strong> Piensa, aprende idiomas, recuerda cosas pasadas y siente emociones.",
+                    "<strong>El Cerebelo:</strong> Controla el equilibrio y coordina los movimientos finos como atarse las agujetas.",
+                    "<strong>El Tallo Cerebral:</strong> Trabaja de forma automática regulando la respiración y los latidos del corazón."
+                ],
+                fact: "¡El cerebro genera suficiente energía eléctrica como para encender un foco LED pequeño!"
+            },
+            medula: {
+                title: "La Médula Espinal",
+                subtitle: "La Supercarretera de Señales",
+                icon: "🦴",
+                desc: "Es un cordón nervioso protegido dentro de la columna vertebral. Conecta el cerebro con el resto del cuerpo.",
+                items: [
+                    "Lleva la información de la piel y órganos hasta el cerebro.",
+                    "Trae de regreso las órdenes del cerebro hacia tus músculos.",
+                    "Produce respuestas automáticas súper rápidas llamadas <strong>actos reflejos</strong>."
+                ],
+                fact: "¡Gracias a la columna vertebral, tu médula está protegida de golpes!"
+            },
+            nervios: {
+                title: "Los Nervios",
+                subtitle: "Sistema Nervioso Periférico",
+                icon: "⚡",
+                desc: "Son una red fina de cables delgados que se extienden desde la médula espinal hasta la punta de tus dedos y dedos de los pies.",
+                items: [
+                    "<strong>Nervios Sensitivos:</strong> Llevan sensaciones de frío, calor, dolor o textura hacia el cerebro.",
+                    "<strong>Nervios Motores:</strong> Llevan las instrucciones de movimiento a los músculos."
+                ],
+                fact: "Si uniéramos todos los nervios de un cuerpo humano adulto, ¡medirían unos 75 kilómetros!"
+            },
+            neurona: {
+                title: "La Neurona",
+                subtitle: "La Célula Especializada",
+                icon: "🔬",
+                desc: "Es la unidad más pequeña del sistema nervioso. Tienen formas con muchas ramificaciones para comunicarse entre sí.",
+                items: [
+                    "<strong>Dendritas:</strong> Reciben mensajes de otras neuronas.",
+                    "<strong>Axón:</strong> Un tubo largo por donde viaja la señal eléctrica.",
+                    "Se comunican mediante un proceso químico llamado <strong>Sinapsis</strong>."
+                ],
+                fact: "Las neuronas son las únicas células de tu cuerpo que no se reproducen fácilmente si se dañan, ¡por eso debemos cuidar la cabeza usando casco!"
+            }
+        };
+
+        function selectOrgan(key) {
+            playSound('click');
+            const data = organData[key];
+            document.getElementById('organ-title').innerText = data.title;
+            document.getElementById('organ-subtitle').innerText = data.subtitle;
+            document.getElementById('organ-icon').innerText = data.icon;
+            document.getElementById('organ-description').innerText = data.desc;
+            document.getElementById('organ-funfact').innerText = data.fact;
+
+            const list = document.getElementById('organ-list');
+            list.innerHTML = '';
+            data.items.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start gap-2';
+                li.innerHTML = `<i class="fa-solid fa-circle-check text-brand-green mt-1"></i> <span>${item}</span>`;
+                list.appendChild(li);
+            });
+
+            // Resaltar botón activo
+            document.querySelectorAll('.organ-btn').forEach(btn => {
+                btn.classList.remove('border-brand-purple', 'bg-white', 'shadow-md');
+            });
+            const activeBtn = document.getElementById(`btn-${key}`);
+            activeBtn.classList.add('border-brand-purple', 'bg-white', 'shadow-md');
+        }
+
+        // SIMULADOR DE RESPUESTAS (SECCIÓN EXPLORA)
+        function runSimulation(type) {
+            playSound('click');
+            const status = document.getElementById('sim-status');
+            const pulse = document.getElementById('sim-pulse');
+            pulse.classList.remove('hidden');
+
+            if (type === 'pelota') {
+                status.innerHTML = `
+                    <span class="bg-brand-blue px-3 py-1 rounded-full text-xs font-bold text-white uppercase">Respuesta Voluntaria</span>
+                    <p class="text-xl font-bold text-yellow-300 mt-2">1. Tus ojos ven volar la pelota 👁️</p>
+                    <p class="text-sm text-gray-300">2. Los nervios llevan la imagen al <strong>Cerebro</strong> 🧠.</p>
+                    <p class="text-sm text-gray-300">3. El cerebro decide: "¡Voy a atraparla!" y envía la orden por la médula.</p>
+                    <p class="text-sm text-green-400 font-bold">4. Tus brazos se mueven y la atrapan 👐.</p>
+                `;
+            } else if (type === 'calor') {
+                status.innerHTML = `
+                    <span class="bg-brand-pink px-3 py-1 rounded-full text-xs font-bold text-white uppercase">Acto Reflejo (Involuntario)</span>
+                    <p class="text-xl font-bold text-red-400 mt-2">1. La piel de la mano siente demasiado calor 🔥</p>
+                    <p class="text-sm text-gray-300">2. El impulso viaja rápido por el nervio hasta la <strong>Médula Espinal</strong> 🦴.</p>
+                    <p class="text-sm text-yellow-300 font-bold">3. ¡La Médula responde de inmediato sin esperar al cerebro!</p>
+                    <p class="text-sm text-green-400 font-bold">4. Retiras la mano volando para no quemarte ✋.</p>
+                `;
+            } else if (type === 'musica') {
+                status.innerHTML = `
+                    <span class="bg-brand-purple px-3 py-1 rounded-full text-xs font-bold text-white uppercase">Procesamiento Sensorial</span>
+                    <p class="text-xl font-bold text-purple-300 mt-2">1. Tus oídos captan el ritmo de la canción 🎧</p>
+                    <p class="text-sm text-gray-300">2. El nervio auditivo informa al cerebro.</p>
+                    <p class="text-sm text-gray-300">3. El cerebro reconoce tu música favorita y te alegra.</p>
+                    <p class="text-sm text-green-400 font-bold">4. Comienzas a marcar el ritmo con el pie 🕺.</p>
+                `;
+            }
+        }
+
+        // TABS DE JUEGOS
+        function switchGame(gameKey) {
+            playSound('click');
+            if (gameKey === 'game1') {
+                document.getElementById('game1-container').classList.remove('hidden');
+                document.getElementById('game2-container').classList.add('hidden');
+                document.getElementById('tab-game1').className = "px-5 py-2 font-bold rounded-xl bg-brand-green text-white shadow";
+                document.getElementById('tab-game2').className = "px-5 py-2 font-bold rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300";
+            } else {
+                document.getElementById('game1-container').classList.add('hidden');
+                document.getElementById('game2-container').classList.remove('hidden');
+                document.getElementById('tab-game2').className = "px-5 py-2 font-bold rounded-xl bg-brand-green text-white shadow";
+                document.getElementById('tab-game1').className = "px-5 py-2 font-bold rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300";
+                loadGame2Question();
+            }
+        }
+
+        // JUEGO 1: ATRAPA NEURONAS
+        let score = 0;
+        let timeLeft = 15;
+        let gameInterval = null;
+        let activeHole = -1;
+
+        function startGame1() {
+            playSound('click');
+            score = 0;
+            timeLeft = 15;
+            document.getElementById('score').innerText = score;
+            document.getElementById('timer').innerText = timeLeft;
+            document.getElementById('btn-start-game1').disabled = true;
+            document.getElementById('btn-start-game1').classList.add('opacity-50');
+
+            gameInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(gameInterval);
+                    endGame1();
+                } else {
+                    popupNeuron();
+                }
+            }, 800);
+        }
+
+        function popupNeuron() {
+            // Limpiar huecos
+            for (let i = 0; i < 9; i++) {
+                const btn = document.getElementById(`hole-${i}`);
+                btn.innerText = '🧠';
+                btn.classList.remove('bg-yellow-300', 'border-yellow-500', 'scale-105');
+            }
+            activeHole = Math.floor(Math.random() * 9);
+            const activeBtn = document.getElementById(`hole-${activeHole}`);
+            activeBtn.innerText = '⚡🟡';
+            activeBtn.classList.add('bg-yellow-300', 'border-yellow-500', 'scale-105');
+        }
+
+        function hitNeuron(index) {
+            if (index === activeHole && timeLeft > 0) {
+                playSound('correct');
+                score += 10;
+                document.getElementById('score').innerText = score;
+                const btn = document.getElementById(`hole-${index}`);
+                btn.innerText = '💥';
+                activeHole = -1;
+            }
+        }
+
+        function endGame1() {
+            playSound('win');
+            alert(`¡Tiempo terminado! Lograste acumulaste ${score} puntos conduciendo impulsos nerviosos.`);
+            document.getElementById('btn-start-game1').disabled = false;
+            document.getElementById('btn-start-game1').classList.remove('opacity-50');
+            for (let i = 0; i < 9; i++) {
+                const btn = document.getElementById(`hole-${i}`);
+                btn.innerText = '🧠';
+                btn.classList.remove('bg-yellow-300', 'border-yellow-500', 'scale-105');
+            }
+        }
+
+        // JUEGO 2: CLASIFICADOR DE ACCIONES
+        const game2Data = [
+            { text: "Parpadear rápidamente si entra un bichito cerca de tu ojo", type: "involuntario", emoji: "👁️" },
+            { text: "Escribir la respuesta de una resta en la pizarra", type: "voluntario", emoji: "✏️" },
+            { text: "El movimiento continuo de tu corazón late que late", type: "involuntario", emoji: "❤️" },
+            { text: "Levantar la mano para pedir la palabra en clase", type: "voluntario", emoji: "✋" },
+            { text: "Quitar el pie inmediatamente tras pisar una espina", type: "involuntario", emoji: "🦶" }
+        ];
+        let game2Index = 0;
+
+        function loadGame2Question() {
+            const current = game2Data[game2Index];
+            document.getElementById('action-text').innerText = current.text;
+            document.getElementById('action-emoji').innerText = current.emoji;
+            document.getElementById('game2-feedback').innerText = "";
+        }
+
+        function checkClassify(selectedType) {
+            const current = game2Data[game2Index];
+            const feedback = document.getElementById('game2-feedback');
+            if (selectedType === current.type) {
+                playSound('correct');
+                feedback.innerHTML = "<span class='text-brand-green'>¡Correcto! 🎉 Excelente análisis.</span>";
+                setTimeout(() => {
+                    game2Index = (game2Index + 1) % game2Data.length;
+                    loadGame2Question();
+                }, 1200);
+            } else {
+                playSound('wrong');
+                feedback.innerHTML = "<span class='text-red-500'>¡Piénsalo bien! Inténtalo otra vez. 💡</span>";
+            }
+        }
+
+        // AUTOEVALUACIÓN / QUIZ
+        const quizData = [
+            {
+                q: "¿Cuál es el órgano del encéfalo encuestado de mantener tu equilibrio cuando corres o andas en bicicleta?",
+                options: ["El Cerebro", "El Cerebelo", "El Tallo Cerebral", "La Médula Espinal"],
+                correct: 1
+            },
+            {
+                q: "¿Cómo se llaman las células especializadas que forman el sistema nervioso?",
+                options: ["Glóbulos Rojos", "Músculos", "Neuronas", "Huesos"],
+                correct: 2
+            },
+            {
+                q: "Un acto reflejo (como retirar la mano al tocar algo hirviendo) es controlado principalmente por:",
+                options: ["La Médula Espinal", "Los Dientes", "El Oído", "Las Uñas"],
+                correct: 0
+            },
+            {
+                q: "Atrapar un balón de fútbol que ves venir volando es una respuesta de tipo:",
+                options: ["Involuntaria", "Automática", "Voluntaria", "Refleja"],
+                correct: 2
+            }
+        ];
+
+        let currentQuizStep = 0;
+        let quizScore = 0;
+
+        function renderQuizQuestion() {
+            const data = quizData[currentQuizStep];
+            document.getElementById('quiz-step').innerText = `Pregunta ${currentQuizStep + 1} de ${quizData.length}`;
+            document.getElementById('quiz-question').innerText = data.q;
+            
+            // Barra de progreso
+            const progress = ((currentQuizStep + 1) / quizData.length) * 100;
+            document.getElementById('quiz-progress').style.width = `${progress}%`;
+
+            const optionsBox = document.getElementById('quiz-options');
+            optionsBox.innerHTML = '';
+
+            data.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 rounded-2xl border-2 border-gray-200 hover:border-brand-purple hover:bg-purple-50 transition font-bold text-gray-700 flex items-center justify-between';
+                btn.innerHTML = `<span>${opt}</span> <i class="fa-regular fa-circle text-gray-300"></i>`;
+                btn.onclick = () => answerQuiz(idx);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function answerQuiz(optionIndex) {
+            const data = quizData[currentQuizStep];
+            if (optionIndex === data.correct) {
+                playSound('correct');
+                quizScore++;
+            } else {
+                playSound('wrong');
+            }
+
+            currentQuizStep++;
+            if (currentQuizStep < quizData.length) {
+                renderQuizQuestion();
+            } else {
+                showQuizResult();
+            }
+        }
+
+        function showQuizResult() {
+            playSound('win');
+            document.getElementById('quiz-question-container').classList.add('hidden');
+            const resultBox = document.getElementById('quiz-result');
+            resultBox.classList.remove('hidden');
+
+            document.getElementById('quiz-score-text').innerText = `Lograste acertar ${quizScore} de ${quizData.length} preguntas correctamente.`;
+            
+            const badgeDesc = document.getElementById('quiz-badge-desc');
+            if (quizScore === 4) {
+                badgeDesc.innerText = "🥇 ¡Medalla de Oro: Maestro Genio del Sistema Nervioso!";
+            } else if (quizScore >= 2) {
+                badgeDesc.innerText = "🥈 ¡Medalla de Plata: Gran Explorador Neuronal!";
+            } else {
+                badgeDesc.innerText = "🥉 ¡Medalla de Bronce: Sigue repasando y te volverás un experto!";
+            }
+        }
+
+        function resetQuiz() {
+            playSound('click');
+            currentQuizStep = 0;
+            quizScore = 0;
+            document.getElementById('quiz-question-container').classList.remove('hidden');
+            document.getElementById('quiz-result').classList.add('hidden');
+            renderQuizQuestion();
+        }
+
+        // Inicializaciones al cargar la página
+        window.onload = function() {
+            selectOrgan('encefalo');
+            renderQuizQuestion();
+        };
+    </script>
+</body>
+</html>
